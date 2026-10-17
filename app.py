@@ -4,10 +4,44 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# API 키 검증
+# API 키 및 설정 검증
 api_key = os.getenv("ANTHROPIC_API_KEY")
+base_url = os.getenv("ANTHROPIC_BASE_URL")
+
+# 설정 오류 체크
+config_errors = []
+
 if not api_key:
-    st.error("❌ API 키가 설정되지 않았습니다. .env 파일에 ANTHROPIC_API_KEY를 추가해주세요.")
+    config_errors.append("❌ ANTHROPIC_API_KEY가 없습니다")
+elif not api_key.startswith(("sk-", "sk_")):
+    config_errors.append("⚠️ API 키 형식이 잘못되었습니다 (sk-로 시작해야 함)")
+
+if base_url and "pickle" in base_url.lower():
+    config_errors.append("❌ BASE_URL이 잘못되었습니다: https://api.pickle.ac")
+    config_errors.append("   → 올바른 URL: https://api.anthropic.com")
+
+if base_url and not base_url.startswith("https://"):
+    config_errors.append("⚠️ BASE_URL은 https://로 시작해야 합니다")
+
+if config_errors:
+    st.error("**⚙️ 설정 오류 감지됨:**")
+    for error in config_errors:
+        st.write(error)
+
+    st.markdown("---")
+    st.info("""
+    **해결 방법:**
+
+    1. `.env` 파일 수정:
+    ```
+    ANTHROPIC_API_KEY=sk-xxxxxxxxxxxx
+    ANTHROPIC_BASE_URL=https://api.anthropic.com
+    ```
+
+    2. 파일 저장 후 앱 재시작
+
+    3. API 키가 없으면: https://console.anthropic.com/ 에서 생성
+    """)
     st.stop()
 
 st.set_page_config(
@@ -213,7 +247,7 @@ if version == "🎓 학생용 (추천)":
         )
 
     with col2:
-        test_button = st.button("🚀 테스트 시작", use_container_width=True)
+        test_button = st.button("🚀 테스트 시작", use_container_width=True, key="student_test_btn")
 
     st.markdown("---")
 
@@ -343,7 +377,8 @@ HTTP 코드: {test_results['http_status']}
                 data=report,
                 file_name=filename,
                 mime="text/plain",
-                use_container_width=True
+                use_container_width=True,
+                key="student_download_btn"
             )
 
     st.markdown("---")
@@ -588,7 +623,7 @@ Please provide:
         )
 
     with col2:
-        test_button = st.button("🚀 Start Test", use_container_width=True)
+        test_button = st.button("🚀 Start Test", use_container_width=True, key="professional_test_btn")
 
     st.markdown("---")
 
@@ -786,7 +821,8 @@ End of Report
                 data=report,
                 file_name=filename,
                 mime="text/plain",
-                use_container_width=True
+                use_container_width=True,
+                key="professional_download_btn"
             )
 
     st.markdown("---")
