@@ -38,18 +38,28 @@ if config_errors:
         st.write(error)
 
     st.markdown("---")
-    st.info("""
+    st.warning(f"""
+    **⚠️ API 키 확인 중요:**
+
+    API 키가 너무 짧으면 유효하지 않습니다!
+    (현재 키 길이: {len(api_key) if api_key else 0}자)
+
+    올바른 형식:
+    - 길이: 40자 이상
+    - 시작: `sk-ant-` 또는 `sk-`
+    - 예: `sk-ant-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
     **해결 방법:**
 
-    1. `.env` 파일 수정:
+    1. https://console.anthropic.com/ 접속
+    2. 새 API 키 생성 (전체 키 복사)
+    3. `.env` 파일에 붙여넣기:
     ```
-    ANTHROPIC_API_KEY=sk-xxxxxxxxxxxx
+    ANTHROPIC_API_KEY=sk-ant-v1-xxxxxxxxxxxx
     ANTHROPIC_BASE_URL=https://api.anthropic.com
     ```
 
-    2. 파일 저장 후 앱 재시작
-
-    3. API 키가 없으면: https://console.anthropic.com/ 에서 생성
+    4. 파일 저장 후 앱 재시작
     """)
     st.stop()
 
@@ -79,7 +89,23 @@ def ask_ai(prompt):
         )
         return res.content[0].text
     except Exception as e:
-        return f"❌ AI 분석 중 오류 발생: {str(e)}"
+        error_msg = str(e)
+        # API 키 오류 감지
+        if "401" in error_msg or "authentication" in error_msg.lower() or "invalid" in error_msg.lower():
+            return f"""
+❌ **API 인증 오류 발생**
+
+문제: API 키가 유효하지 않습니다.
+
+해결 방법:
+1. .env 파일의 API 키 확인
+2. https://console.anthropic.com/ 에서 새 API 키 생성
+3. .env 파일에 올바른 키 입력
+4. 앱 재시작
+
+현재 오류: {error_msg}
+"""
+        return f"❌ AI 분석 중 오류 발생: {error_msg}"
 
 def test_web_app(url):
     """웹앱을 테스트하고 상태 확인"""

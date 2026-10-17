@@ -40,18 +40,28 @@ if config_errors:
         st.write(error)
 
     st.markdown("---")
-    st.info("""
+    st.warning(f"""
+    **⚠️ Important: Verify Your API Key**
+
+    Your API key is too short to be valid!
+    (Current key length: {len(api_key) if api_key else 0} characters)
+
+    Correct Format:
+    - Length: 40+ characters
+    - Starts with: `sk-ant-` or `sk-`
+    - Example: `sk-ant-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
     **How to Fix:**
 
-    1. Edit `.env` file:
+    1. Visit https://console.anthropic.com/
+    2. Generate a new API key (copy the entire key)
+    3. Update your `.env` file:
     ```
-    ANTHROPIC_API_KEY=sk-xxxxxxxxxxxx
+    ANTHROPIC_API_KEY=sk-ant-v1-xxxxxxxxxxxx
     ANTHROPIC_BASE_URL=https://api.anthropic.com
     ```
 
-    2. Save and restart the app
-
-    3. Get API key: https://console.anthropic.com/
+    4. Save and restart the app
     """)
     st.stop()
 
@@ -81,7 +91,23 @@ def ask_ai(prompt):
         )
         return res.content[0].text
     except Exception as e:
-        return f"Error during AI analysis: {str(e)}"
+        error_msg = str(e)
+        # Detect API authentication errors
+        if "401" in error_msg or "authentication" in error_msg.lower() or "invalid" in error_msg.lower():
+            return f"""
+❌ **API Authentication Error (401)**
+
+Problem: Your API key is invalid or expired.
+
+Solution:
+1. Check the API key in .env file
+2. Generate a new API key at https://console.anthropic.com/
+3. Update .env file with the correct key
+4. Restart the app
+
+Current error: {error_msg}
+"""
+        return f"❌ Error during AI analysis: {error_msg}"
 
 def test_web_app(url, check_all_links=False):
     """Comprehensive web app testing"""
