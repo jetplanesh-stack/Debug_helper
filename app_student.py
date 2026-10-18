@@ -13,66 +13,12 @@ except ImportError:
 
 load_dotenv()
 
-# API 키 및 설정 검증
 api_key = os.getenv("ANTHROPIC_API_KEY")
 base_url = os.getenv("ANTHROPIC_BASE_URL")
 
-# 설정 오류 체크
-config_errors = []
-
-if not api_key:
-    config_errors.append("❌ ANTHROPIC_API_KEY가 없습니다")
-elif not api_key.startswith(("sk-", "sk_")):
-    config_errors.append("⚠️ API 키 형식이 잘못되었습니다 (sk-로 시작해야 함)")
-
-if base_url and "pickle" in base_url.lower():
-    config_errors.append("❌ BASE_URL이 잘못되었습니다: https://api.pickle.ac")
-    config_errors.append("   → 올바른 URL: https://api.anthropic.com")
-
-if base_url and not base_url.startswith("https://"):
-    config_errors.append("⚠️ BASE_URL은 https://로 시작해야 합니다")
-
-if config_errors:
-    st.error("**⚙️ 설정 오류 감지됨:**")
-    for error in config_errors:
-        st.write(error)
-
-    st.markdown("---")
-    st.warning(f"""
-    **⚠️ API 키 확인 중요:**
-
-    API 키가 너무 짧으면 유효하지 않습니다!
-    (현재 키 길이: {len(api_key) if api_key else 0}자)
-
-    올바른 형식:
-    - 길이: 40자 이상
-    - 시작: `sk-ant-` 또는 `sk-`
-    - 예: `sk-ant-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-    **해결 방법:**
-
-    1. https://console.anthropic.com/ 접속
-    2. 새 API 키 생성 (전체 키 복사)
-    3. `.env` 파일에 붙여넣기:
-    ```
-    ANTHROPIC_API_KEY=sk-ant-v1-xxxxxxxxxxxx
-    ANTHROPIC_BASE_URL=https://api.anthropic.com
-    ```
-
-    4. 파일 저장 후 앱 재시작
-    """)
-    st.stop()
-
 client = Anthropic(
-    base_url=os.getenv("ANTHROPIC_BASE_URL"),
+    base_url=base_url,
     api_key=api_key
-)
-
-st.set_page_config(
-    page_title="🎓 웹앱 디버거 - 학생용",
-    page_icon="🎓",
-    layout="wide",
-    initial_sidebar_state="expanded"
 )
 
 st.title("🎓 웹앱 디버깅 학습 도구")

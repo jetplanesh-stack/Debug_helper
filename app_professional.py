@@ -15,66 +15,12 @@ except ImportError:
 
 load_dotenv()
 
-# API 키 및 설정 검증
 api_key = os.getenv("ANTHROPIC_API_KEY")
 base_url = os.getenv("ANTHROPIC_BASE_URL")
 
-# 설정 오류 체크
-config_errors = []
-
-if not api_key:
-    config_errors.append("❌ ANTHROPIC_API_KEY is not set")
-elif not api_key.startswith(("sk-", "sk_")):
-    config_errors.append("⚠️ API key format is invalid (must start with sk-)")
-
-if base_url and "pickle" in base_url.lower():
-    config_errors.append("❌ BASE_URL is incorrect: https://api.pickle.ac")
-    config_errors.append("   → Correct URL: https://api.anthropic.com")
-
-if base_url and not base_url.startswith("https://"):
-    config_errors.append("⚠️ BASE_URL must start with https://")
-
-if config_errors:
-    st.error("**⚙️ Configuration Errors Detected:**")
-    for error in config_errors:
-        st.write(error)
-
-    st.markdown("---")
-    st.warning(f"""
-    **⚠️ Important: Verify Your API Key**
-
-    Your API key is too short to be valid!
-    (Current key length: {len(api_key) if api_key else 0} characters)
-
-    Correct Format:
-    - Length: 40+ characters
-    - Starts with: `sk-ant-` or `sk-`
-    - Example: `sk-ant-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-    **How to Fix:**
-
-    1. Visit https://console.anthropic.com/
-    2. Generate a new API key (copy the entire key)
-    3. Update your `.env` file:
-    ```
-    ANTHROPIC_API_KEY=sk-ant-v1-xxxxxxxxxxxx
-    ANTHROPIC_BASE_URL=https://api.anthropic.com
-    ```
-
-    4. Save and restart the app
-    """)
-    st.stop()
-
 client = Anthropic(
-    base_url=os.getenv("ANTHROPIC_BASE_URL"),
+    base_url=base_url,
     api_key=api_key
-)
-
-st.set_page_config(
-    page_title="Professional Web Debugger",
-    page_icon="🔧",
-    layout="wide",
-    initial_sidebar_state="expanded"
 )
 
 st.title("🔧 Professional Web App Testing & Debugging")
